@@ -9,6 +9,7 @@ GEM
   specs:
     libxml-ruby (2.8.0)
     parallel (1.11.2)
+    ruby-progressbar (1.8.1)
 
 PLATFORMS
   ruby
@@ -16,6 +17,7 @@ PLATFORMS
 DEPENDENCIES
   libxml-to-hash!
   parallel
+  ruby-progressbar
 
 BUNDLED WITH
    1.14.6
