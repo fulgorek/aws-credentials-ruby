@@ -3,7 +3,6 @@
 require_relative "lib/signature"
 require "net/https"
 require "libxml_to_hash"
-require "inquirer"
 require "uri"
 require "json"
 
@@ -18,7 +17,7 @@ module AWS
     }
 
     def initialize
-      verify_gem
+      verify_gems
       credentials
       read_identity
       puts Hash[ list_access_keys.map{ |a| [a.first,a.last] } ].to_json
@@ -30,13 +29,18 @@ module AWS
       if ENV['AWS_ACCESS_KEY'] and ENV['AWS_SECRET_KEY']
         @access_key, @secret_key = ENV['AWS_ACCESS_KEY'], ENV['AWS_SECRET_KEY']
       else
-        @access_key = Ask.input "Enter your Access Key", password: false
-        @secret_key = Ask.input "Enter your Secret Key", password: true
-        if access_key.blank? || secret_key.blank?
+        @access_key = prompt "Enter your Access Key: "
+        @secret_key = prompt "Enter your Secret Key: "
+        if access_key.empty? || secret_key.empty?
           puts 'Please provide valid credentials, Aborting.'
           exit
         end
       end
+    end
+
+    def prompt(*args)
+      print(*args)
+      gets.rstrip
     end
 
     def read_identity
@@ -54,7 +58,6 @@ module AWS
       end
     end
 
-
     def list_users
       @list_users ||= process_users_list
     end
@@ -65,7 +68,7 @@ module AWS
       data.is_a?(Array) ? data.map{|x| x['AccessKeyId']} : [data['AccessKeyId']]
     end
 
-    def verify_gem
+    def verify_gems
       if !Hash.methods.include? :from_libxml
         puts 'Please bundle or install `libxml_to_hash` gem first, Aborting!'
         exit

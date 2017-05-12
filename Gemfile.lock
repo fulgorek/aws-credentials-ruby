@@ -7,18 +7,12 @@ GIT
 
 GEM
   specs:
-    inquirer (0.2.1)
-      term-ansicolor (>= 1.2.2)
     libxml-ruby (2.8.0)
-    term-ansicolor (1.6.0)
-      tins (~> 1.0)
-    tins (1.13.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  inquirer
   libxml-to-hash!
 
 BUNDLED WITH
