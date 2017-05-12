@@ -8,12 +8,14 @@ GIT
 GEM
   specs:
     libxml-ruby (2.8.0)
+    parallel (1.11.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   libxml-to-hash!
+  parallel
 
 BUNDLED WITH
    1.14.6

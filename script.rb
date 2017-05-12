@@ -5,6 +5,7 @@ require "net/https"
 require "libxml_to_hash"
 require "uri"
 require "json"
+require "parallel"
 
 module AWS
   class Request
@@ -13,14 +14,14 @@ module AWS
     ENDPOINTS = {
       :identity   => 'https://sts.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15',
       :list_users => 'https://iam.amazonaws.com/?Action=ListUsers&Version=2010-05-08',
-      :access_key => "https://iam.amazonaws.com/?Action=ListAccessKeys&UserName=%s&Version=2010-05-08"
+      :access_key => 'https://iam.amazonaws.com/?Action=ListAccessKeys&UserName=%s&Version=2010-05-08'
     }
 
     def initialize
       verify_gems
       credentials
       read_identity
-      puts Hash[ list_access_keys.map{ |a| [a.first,a.last] } ].to_json
+      puts Hash[ list_access_keys.map{ |a| [a.first, a.last] } ].to_json
     end
 
     private
@@ -53,8 +54,14 @@ module AWS
     end
 
     def list_access_keys
-      list_users.map do |user|
-        [user, process_user_keys(send_request(uri_user(user)))]
+      if Object.const_defined?('Parallel')
+        Parallel.map(list_users, in_processes: 8) do |user|
+          [user, process_user_keys(send_request(uri_user(user)))]
+        end
+      else
+        list_users.map do |user|
+          [user, process_user_keys(send_request(uri_user(user)))]
+        end
       end
     end
 
