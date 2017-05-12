@@ -7,6 +7,7 @@ Return a valid JSON object where the keys are IAM usernames, and the values are 
 
 - Ruby
 - libxml_to_hash gem
+- ruby-progressbar gem (for debug mode only)
 
 ## Instructions
 1) bundle or install libxml_to_hash gem
@@ -29,6 +30,14 @@ This option will show you an ETA and how much processes are running in parallel.
 
 Note: only work with parallel processing enabled.
 
+
+## Benchmark
+- for ~100 AWS users
+
+```
+64 Processes: ~3 seconds
+Single Process: ~32 seconds
+```
 
 ## Bonus!
 Getting every key is slow? I've added parallel processing!
