@@ -17,9 +17,12 @@ module AWS
       :access_key => 'https://iam.amazonaws.com/?Action=ListAccessKeys&UserName=%s&Version=2010-05-08'
     }
 
+    MAX_PROCESSES = 64
+
     def initialize
       verify_gems
       credentials
+      parameters
       read_identity
       puts Hash[ list_access_keys.map{ |a| [a.first, a.last] } ].to_json
     end
@@ -44,6 +47,15 @@ module AWS
       gets.rstrip
     end
 
+    def parameters
+      params = {}
+      ARGV.each do |arg|
+        match = /--(?<key>.*?)=(?<value>.*)/.match(arg)
+        params[match[:key]] = match[:value]
+      end
+      params
+    end
+
     def read_identity
       identity = send_request(ENDPOINTS[:identity])
       if identity['ErrorResponse']
@@ -53,16 +65,28 @@ module AWS
       identity
     end
 
+    def in_parallel
+      parameters['mode'] != 'sync' && Object.const_defined?('Parallel')
+    end
+
+    def progress
+      parameters['debug'] == 'true' ? "Getting Keys (#{processes} processes)" : nil
+    end
+
+    def processes
+      procs = parameters['procs'].to_i
+      (1..MAX_PROCESSES) === procs ? procs : MAX_PROCESSES
+    end
+
     def list_access_keys
-      if Object.const_defined?('Parallel')
-        Parallel.map(list_users, in_processes: 8) do |user|
-          [user, process_user_keys(send_request(uri_user(user)))]
-        end
-      else
-        list_users.map do |user|
-          [user, process_user_keys(send_request(uri_user(user)))]
-        end
+      return list_users.map{ |user| process_keys(user) } unless in_parallel
+      Parallel.map(list_users, in_processes: processes, progress: progress) do |user|
+        process_keys(user)
       end
+    end
+
+    def process_keys(user)
+      [user, process_user_keys(send_request(uri_user(user)))]
     end
 
     def list_users
