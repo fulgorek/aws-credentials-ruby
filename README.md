@@ -9,5 +9,8 @@ Return a valid JSON object where the keys are IAM usernames, and the values are 
 
 ## Instructions
 `bundle` or install libxml_to_hash gem
+
 Optional: fill your details on the env.sh and source it `source env.sh`
+
 `$ ./script.rb`
+
